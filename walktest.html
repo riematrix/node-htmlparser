@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Node.js HTML Parser</title>
+    <script language="JavaScript" src="lib/htmlparser.js">
+    </script>
+</head>
+<body style="font-size: small; font-family:Arial, Helvetica, sans-serif;">
+
+<textarea  class="resizable ui-resizable" id="Content" style="width: 663px; height:263px; display: block;">
+    <root>
+        <xslif id="1" >
+            <xslif test="First Level" tet="fff" />
+            <xslif test="First Level" tet="xxxxx" >
+                <xslif test="Second Level" tet="fff" >
+                    <test id="Third Level" />
+                </xslif>
+            </xslif>
+        </xslif>
+        <xsleval id="2">getfn("prop", this);</xsleval>
+    </root>
+</textarea>
+<br>
+<textarea  class="resizable ui-resizable" id="Result" style="width: 663px; height:263px; display: block;"></textarea>
+<button onclick="document.getElementById('Result').value = ( GeneratejSon( document.getElementById('Content').value ))">Execute</button>
+
+<script language="JavaScript">
+
+    function GeneratejSon(content) {
+        var handler = new Tautologistics.NodeHtmlParser.DefaultHandler(function (error, dom) {
+            if (error){console.log(error)}
+        });
+        var parser = new Tautologistics.NodeHtmlParser.Parser(handler);
+        parser.parseComplete(content);
+        var domList = handler.dom, dom = domList[0];
+        for(var i = 0;dom.type==="text";i++,dom = handler.dom[i]);
+        var root = dom;
+        var json = {};
+        GenerateJsonSub(root,json,root.name);
+        return JSON.stringify(json, null, 2);
+    }
+
+    function GenerateJsonSub(el , context, specifiedName )
+    {
+        var attributes = el.attribs;
+        for (var attrkey in attributes) {
+            if(attributes.hasOwnProperty(attrkey))
+                context[attrkey] = attributes[attrkey];
+        }
+
+        var childElements = el.children;
+        if(!childElements) return;
+        var rootName = specifiedName?specifiedName:"SubItems";
+        context[rootName] = [];
+        for (var i=0; i<childElements.length; i++) {
+            var elem = childElements[i];
+            if(elem.type==="text"){
+                if(elem.data.trim()!=""){
+                    context["textContent"] = elem.data.trim();
+                }
+                continue;
+            }
+            var child = {},self = {};
+            self[elem.name] = child;
+            GenerateJsonSub(elem,  child);
+            context[rootName].push(self);
+        }
+        if(context[rootName].length<1) delete context[rootName];
+
+    }
+
+</script>
+
+</body>
+</html>
